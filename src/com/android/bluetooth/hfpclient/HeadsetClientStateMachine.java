@@ -68,6 +68,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import com.android.bluetooth.R;
+
 final class HeadsetClientStateMachine extends StateMachine {
     private static final String TAG = "HeadsetClientStateMachine";
     private static final boolean DBG = false;
@@ -144,6 +146,8 @@ final class HeadsetClientStateMachine extends StateMachine {
 
     private final AudioManager mAudioManager;
     private int mAudioState;
+    // Indicates whether audio can be routed to the device.
+    private boolean mAudioRouteAllowed;
     private boolean mAudioWbs;
     private final BluetoothAdapter mAdapter;
     private boolean mNativeAvailable;
@@ -1227,6 +1231,9 @@ final class HeadsetClientStateMachine extends StateMachine {
         mAudioState = BluetoothHeadsetClient.STATE_AUDIO_DISCONNECTED;
         mAudioWbs = false;
 
+        mAudioRouteAllowed = context.getResources().getBoolean(
+                R.bool.headset_client_initial_audio_route_allowed);
+
         if(alert == null) {
             // alert is null, using backup
             alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -1240,6 +1247,7 @@ final class HeadsetClientStateMachine extends StateMachine {
         } else {
             Log.e(TAG,"alert is NULL no ringtone");
         }
+
         mIndicatorNetworkState = HeadsetClientHalConstants.NETWORK_STATE_NOT_AVAILABLE;
         mIndicatorNetworkType = HeadsetClientHalConstants.SERVICE_TYPE_HOME;
         mIndicatorNetworkSignal = 0;
@@ -2106,6 +2114,11 @@ final class HeadsetClientStateMachine extends StateMachine {
                     mAudioWbs = true;
                     // fall through
                 case HeadsetClientHalConstants.AUDIO_STATE_CONNECTED:
+                    if (!mAudioRouteAllowed) {
+                        sendMessage(HeadsetClientStateMachine.DISCONNECT_AUDIO);
+                        break;
+                    }
+
                     mAudioState = BluetoothHeadsetClient.STATE_AUDIO_CONNECTED;
                     // request audio focus for call
                     if (mRingtone != null && mRingtone.isPlaying()) {
@@ -2501,6 +2514,14 @@ final class HeadsetClientStateMachine extends StateMachine {
 
     boolean isAudioOn() {
         return (getCurrentState() == mAudioOn);
+    }
+
+    public void setAudioRouteAllowed(boolean allowed) {
+        mAudioRouteAllowed = allowed;
+    }
+
+    public boolean getAudioRouteAllowed() {
+        return mAudioRouteAllowed;
     }
 
     synchronized int getAudioState(BluetoothDevice device) {

@@ -34,4 +34,7 @@
          fire Bluetooth LE scan result callbacks in addition to having one
          of the location permissions. -->
     <bool name="strict_location_check">true</bool>
+
+    <bool name="headset_client_initial_audio_route_allowed">true</bool>
+
 </resources>
