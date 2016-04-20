@@ -51,10 +51,13 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
+<<<<<<< HEAD
 import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Profile;
+=======
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 

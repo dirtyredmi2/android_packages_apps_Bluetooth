@@ -128,8 +128,6 @@ final class HeadsetClientStateMachine extends StateMachine {
     private int mIndicatorCallHeld;
     private boolean mVgsFromStack = false;
     private boolean mVgmFromStack = false;
-    private Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-    private Ringtone mRingtone = null;
 
     private String mOperatorName;
     private String mSubscriberInfo;
@@ -177,18 +175,23 @@ final class HeadsetClientStateMachine extends StateMachine {
         ProfileService.println(sb, "mIndicatorCallHeld: " + mIndicatorCallHeld);
         ProfileService.println(sb, "mVgsFromStack: " + mVgsFromStack);
         ProfileService.println(sb, "mVgmFromStack: " + mVgmFromStack);
-        ProfileService.println(sb, "mRingtone: " + mRingtone);
         ProfileService.println(sb, "mOperatorName: " + mOperatorName);
         ProfileService.println(sb, "mSubscriberInfo: " + mSubscriberInfo);
         ProfileService.println(sb, "mVoiceRecognitionActive: " + mVoiceRecognitionActive);
         ProfileService.println(sb, "mInBandRingtone: " + mInBandRingtone);
+
         ProfileService.println(sb, "mCalls:");
-        for (BluetoothHeadsetClientCall call : mCalls.values()) {
-            ProfileService.println(sb, "  " + call);
+        if (mCalls != null) {
+            for (BluetoothHeadsetClientCall call : mCalls.values()) {
+                ProfileService.println(sb, "  " + call);
+            }
         }
+
         ProfileService.println(sb, "mCallsUpdate:");
-        for (BluetoothHeadsetClientCall call : mCallsUpdate.values()) {
-            ProfileService.println(sb, "  " + call);
+        if (mCallsUpdate != null) {
+            for (BluetoothHeadsetClientCall call : mCallsUpdate.values()) {
+                ProfileService.println(sb, "  " + call);
+            }
         }
     }
 
@@ -450,6 +453,7 @@ final class HeadsetClientStateMachine extends StateMachine {
     private void updateCallSetupIndicator(int callsetup) {
         Log.d(TAG, "updateCallSetupIndicator " + callsetup + " " + mPendingAction.first);
 
+<<<<<<< HEAD
         if (mRingtone != null && mRingtone.isPlaying()) {
             Log.d(TAG,"stopping ring after no response");
             mRingtone.stop();
@@ -462,6 +466,8 @@ final class HeadsetClientStateMachine extends StateMachine {
             mAudioManager.abandonAudioFocusForCall();
         }
 
+=======
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
         if (waitForIndicators(-1, callsetup, -1)) {
             return;
         }
@@ -1008,6 +1014,7 @@ final class HeadsetClientStateMachine extends StateMachine {
         int action;
 
         Log.d(TAG, "rejectCall");
+<<<<<<< HEAD
         if ( mRingtone != null && mRingtone.isPlaying()) {
             Log.d(TAG,"stopping ring after call reject");
             mRingtone.stop();
@@ -1019,6 +1026,8 @@ final class HeadsetClientStateMachine extends StateMachine {
             // abandon audio focus after the mode has been set back to normal
             mAudioManager.abandonAudioFocusForCall();
         }
+=======
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
 
         BluetoothHeadsetClientCall c =
                 getCall(BluetoothHeadsetClientCall.CALL_STATE_INCOMING,
@@ -1234,6 +1243,7 @@ final class HeadsetClientStateMachine extends StateMachine {
         mAudioRouteAllowed = context.getResources().getBoolean(
                 R.bool.headset_client_initial_audio_route_allowed);
 
+<<<<<<< HEAD
         if(alert == null) {
             // alert is null, using backup
             alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -1248,6 +1258,8 @@ final class HeadsetClientStateMachine extends StateMachine {
             Log.e(TAG,"alert is NULL no ringtone");
         }
 
+=======
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
         mIndicatorNetworkState = HeadsetClientHalConstants.NETWORK_STATE_NOT_AVAILABLE;
         mIndicatorNetworkType = HeadsetClientHalConstants.SERVICE_TYPE_HOME;
         mIndicatorNetworkSignal = 0;
@@ -2008,24 +2020,6 @@ final class HeadsetClientStateMachine extends StateMachine {
                             mService.sendBroadcast(intent, ProfileService.BLUETOOTH_PERM);
                             break;
                         case EVENT_TYPE_RING_INDICATION:
-                            Log.e(TAG, "start ringing");
-                            if (mRingtone != null && mRingtone.isPlaying()) {
-                                Log.d(TAG,"ring already playing");
-                                break;
-                            }
-                            int newAudioMode = AudioManager.MODE_RINGTONE;
-                            int currMode = mAudioManager.getMode();
-                            if (currMode != newAudioMode) {
-                                 // request audio focus before setting the new mode
-                                 mAudioManager.requestAudioFocusForCall(AudioManager.MODE_RINGTONE,
-                                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
-                                 Log.d(TAG, "setAudioMode Setting audio mode from "
-                                    + currMode + " to " + newAudioMode);
-                                 mAudioManager.setMode(newAudioMode);
-                            }
-                            if (mRingtone != null) {
-                                mRingtone.play();
-                            }
                             break;
                         case EVENT_TYPE_CGMI:
                             Log.d(TAG, "cgmi:" + event.valueString);
@@ -2121,10 +2115,6 @@ final class HeadsetClientStateMachine extends StateMachine {
 
                     mAudioState = BluetoothHeadsetClient.STATE_AUDIO_CONNECTED;
                     // request audio focus for call
-                    if (mRingtone != null && mRingtone.isPlaying()) {
-                        Log.d(TAG,"stopping ring and request focus for call");
-                        mRingtone.stop();
-                    }
                     int newAudioMode = AudioManager.MODE_IN_CALL;
                     int currMode = mAudioManager.getMode();
                     if (currMode != newAudioMode) {
@@ -2135,6 +2125,11 @@ final class HeadsetClientStateMachine extends StateMachine {
                             + currMode + " to " + newAudioMode);
                          mAudioManager.setMode(newAudioMode);
                     }
+
+                    // We need to set the volume after switching into HFP mode as some Audio HALs
+                    // reset the volume to a known-default on mode switch.
+                    final int volume =
+                            mAudioManager.getStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO);
                     Log.d(TAG,"hfp_enable=true");
                     Log.d(TAG,"mAudioWbs is " + mAudioWbs);
                     if (mAudioWbs) {
@@ -2146,8 +2141,7 @@ final class HeadsetClientStateMachine extends StateMachine {
                         mAudioManager.setParameters("hfp_set_sampling_rate=8000");
                     }
                     mAudioManager.setParameters("hfp_enable=true");
-                    broadcastAudioState(device, BluetoothHeadsetClient.STATE_AUDIO_CONNECTED,
-                            BluetoothHeadsetClient.STATE_AUDIO_CONNECTING);
+                    mAudioManager.setParameters("hfp_volume=" + volume);
                     transitionTo(mAudioOn);
                     break;
                 case HeadsetClientHalConstants.AUDIO_STATE_CONNECTING:
@@ -2181,6 +2175,9 @@ final class HeadsetClientStateMachine extends StateMachine {
             Log.d(TAG, "Enter AudioOn: " + getCurrentMessage().what);
 
             mAudioManager.setStreamSolo(AudioManager.STREAM_BLUETOOTH_SCO, true);
+
+            broadcastAudioState(mCurrentDevice, BluetoothHeadsetClient.STATE_AUDIO_CONNECTED,
+                BluetoothHeadsetClient.STATE_AUDIO_CONNECTING);
         }
 
         @Override

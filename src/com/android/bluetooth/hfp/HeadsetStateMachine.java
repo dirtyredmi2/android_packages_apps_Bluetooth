@@ -190,6 +190,7 @@ final class HeadsetStateMachine extends StateMachine {
 
     // Indicates whether audio can be routed to the device.
     private boolean mAudioRouteAllowed = true;
+<<<<<<< HEAD
     
     private boolean mA2dpSuspend;
     private int mA2dpPlayState;
@@ -198,6 +199,8 @@ final class HeadsetStateMachine extends StateMachine {
     //ConcurrentLinkeQueue is used so that it is threadsafe
     private ConcurrentLinkedQueue<HeadsetCallState> mPendingCallStates = new ConcurrentLinkedQueue<HeadsetCallState>();
 
+=======
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
 
     // mCurrentDevice is the device connected before the state changes
     // mTargetDevice is the device to be connected

@@ -690,10 +690,20 @@ public class BluetoothPbapObexServer extends ServerRequestHandler {
                     currentValue = nameList.get(pos);
                     if (D) Log.d(TAG, "currentValue=" + currentValue);
                     if (currentValue.equals(compareValue)) {
+<<<<<<< HEAD
                         if (currentValue.contains(","))
                             currentValue = currentValue.substring(0, currentValue.lastIndexOf(','));
                         selectedNameList.add(currentValue);
                         savedPosList.add(pos);
+=======
+                        itemsFound++;
+                        int handle = pos;
+                        if (currentValue.contains(",")) {
+                           handle = Integer.valueOf(currentValue.substring(currentValue.lastIndexOf(',') + 1));
+                           currentValue = currentValue.substring(0, currentValue.lastIndexOf(','));
+                        }
+                        writeVCardEntry(handle, currentValue,result);
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
                     }
                 }
             }
@@ -713,15 +723,28 @@ public class BluetoothPbapObexServer extends ServerRequestHandler {
             }
             for (pos = 0; pos < listSize; pos++) {
                 currentValue = nameList.get(pos);
+<<<<<<< HEAD
 
                 if (currentValue.contains(","))
+=======
+                int handle = pos;
+                if (currentValue.contains(",")) {
+                    handle = Integer.valueOf(currentValue.substring(currentValue.lastIndexOf(',') + 1));
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
                     currentValue = currentValue.substring(0, currentValue.lastIndexOf(','));
+                }
 
+<<<<<<< HEAD
                 if (searchValue != null) {
                     if (searchValue.isEmpty() || ((currentValue.toLowerCase()).startsWith(compareValue.toLowerCase()))) {
                         selectedNameList.add(currentValue);
                         savedPosList.add(pos);
                     }
+=======
+                if (searchValue.isEmpty() || ((currentValue.toLowerCase()).equals(compareValue.toLowerCase()))) {
+                    itemsFound++;
+                    writeVCardEntry(handle, currentValue,result);
+>>>>>>> 62174785032ea90aebb63f005ae5e046c4494152
                 }
             }
 
@@ -969,7 +992,7 @@ public class BluetoothPbapObexServer extends ServerRequestHandler {
             Log.w(TAG, "wrong path!");
             return ResponseCodes.OBEX_HTTP_NOT_ACCEPTABLE;
         } else if (appParamValue.needTag == ContentType.PHONEBOOK) {
-            if (intIndex < 0 || intIndex >= size) {
+            if (intIndex < 0) {
                 Log.w(TAG, "The requested vcard is not acceptable! name= " + name);
                 return ResponseCodes.OBEX_HTTP_NOT_FOUND;
             } else if (intIndex == 0) {

@@ -196,11 +196,13 @@ final class A2dpStateMachine extends StateMachine {
     }
 
     public void doQuit() {
-        if ((mTargetDevice != null) &&
-            (getConnectionState(mTargetDevice) == BluetoothProfile.STATE_CONNECTING)) {
-            log("doQuit()- Move A2DP State to DISCONNECTED");
-            broadcastConnectionState(mTargetDevice, BluetoothProfile.STATE_DISCONNECTED,
-                                     BluetoothProfile.STATE_CONNECTING);
+        synchronized (A2dpStateMachine.this) {
+            if ((mTargetDevice != null) &&
+                (getConnectionState(mTargetDevice) == BluetoothProfile.STATE_CONNECTING)) {
+                log("doQuit()- Move A2DP State to DISCONNECTED");
+                broadcastConnectionState(mTargetDevice, BluetoothProfile.STATE_DISCONNECTED,
+                                         BluetoothProfile.STATE_CONNECTING);
+            }
         }
 
         if ((mIncomingDevice!= null) &&
